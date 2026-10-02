@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Nova.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Nova"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Nova">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid>
+
+        <NavigationView
+            x:Name="MainNavigation"
+            ItemInvoked="MainNavigation_ItemInvoked">
+
+            <NavigationView.MenuItems>
+                
+                <NavigationViewItem
+                    Content="Home"
+                    Tag="Home"/>
+
+                <NavigationViewItem
+                    Content="Customer"
+                    Tag="Customer"/>
+
+                <NavigationViewItem
+                    Content="Vendors"
+                    Tag="Vendors"/>
+
+                <NavigationViewItem
+                    Content="Parts"
+                    Tag="Parts"/>
+
+                <NavigationViewItem
+                    Content="Pro Formas"
+                    Tag="ProFormas"/>
+
+                <NavigationViewItem
+                    Content="Invoices"
+                    Tag="Invoices"/>
+
+                <NavigationViewItem
+                    Content="Reports"
+                    Tag="Reports"/>
+
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame">
+                
+            </Frame>
+
+        </NavigationView>
+
+    </Grid>
+</Window>

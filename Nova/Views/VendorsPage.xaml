@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Nova.Views.VendorsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Nova.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="#121217">
+
+        <Grid Margin="24,20,24,24">
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+        
+            <!-- Title -->
+            <TextBlock
+                Grid.Row="0"
+                Text="Vendors"
+                FontSize="32"
+                HorizontalAlignment="Center"/>
+            
+            <!-- Search bar and new vendor button -->
+            <StackPanel
+                Grid.Row="1"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="12"
+                Margin="0,12,0,20">
+
+                <TextBox
+                    PlaceholderText="Search vendors..."
+                    Width="380"
+                    Style="{StaticResource NovaTextBoxStyle}"/>
+
+                <Button
+                    Content="New Vendor"
+                    Background="Transparent"
+                    BorderBrush="#6F5AA8"
+                    BorderThickness="1"
+                    Foreground="#D8D0F0"
+                    Click="NewVendor_Click"/>
+
+            </StackPanel>
+            
+            <!-- Vendor details area -->
+            <StackPanel
+                Grid.Row="2"
+                HorizontalAlignment="Stretch"
+                Orientation="Vertical"
+                Spacing="12"
+                Margin="24,0,24,24">
+
+                <!-- Columns -->
+                <Grid ColumnSpacing="20">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left -->
+                    <Border
+                        Grid.Column="0"
+                        Padding="20"
+                        CornerRadius="10"
+                        BorderThickness="1"
+                        BorderBrush="#6F5AA8"
+                        Background="#1F1F24">
+
+                        <StackPanel
+                            Orientation="Vertical"
+                            HorizontalAlignment="Stretch"
+                            Spacing="4">
+                            
+                            <!-- Left Column Title -->
+                            <TextBlock
+                                Text="Vendor Information"
+                                FontSize="20"
+                                Foreground="#B9A7FF"
+                                FontWeight="SemiBold"
+                                Margin="0,0,0,8"/>
+
+                            <Grid
+                                RowSpacing="12"
+                                ColumnSpacing="12">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Name -->
+                                <StackPanel
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        FontSize="14">
+                                        
+                                        <Run Text="Name"/>
+                                        <Run
+                                            Text=" *"
+                                            Foreground="Red"/>
+
+                                    </TextBlock>
+                                    <TextBox
+                                        x:Name="VendorNameText"
+                                        Style="{StaticResource NovaTextBoxStyle}"/>
+
+                                </StackPanel>
+                                
+                                <!-- Number -->
+                                <StackPanel
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        FontSize="14">
+                                        
+                                        <Run Text="Vendor Number"/>
+                                        <Run
+                                            Text=" *"
+                                            Foreground="Red"/>
+
+                                    </TextBlock>
+
+                                    <TextBox
+                                        x:Name="VendorNumberText"
+                                        Style="{StaticResource NovaTextBoxStyle}"/>
+
+                                </StackPanel>
+
+                                <!-- Contact Name -->
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        Text="Contact Name"
+                                        FontSize="14"/>
+
+                                    <TextBox
+                                        x:Name="ContactNameText"
+                                        Style="{StaticResource NovaTextBoxStyle}"/>
+
+                                </StackPanel>
+
+                                <!-- Phone -->
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        Text="Phone"
+                                        FontSize="14"/>
+
+                                    <TextBox
+                                        x:Name="VendorPhoneText"
+                                        Style="{StaticResource NovaTextBoxStyle}"/>
+
+                                </StackPanel>
+
+                                <!-- Email -->
+                                <StackPanel
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        Text="Email"
+                                        FontSize="14"/>
+
+                                    <TextBox
+                                        x:Name="VendorEmailText"
+                                        Style="{StaticResource NovaTextBoxStyle}"/>
+
+                                </StackPanel>
+
+                                <!-- Terms -->
+                                <StackPanel
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        Text="Terms"
+                                        FontSize="14"/>
+
+                                    <TextBox
+                                        x:Name="VendorTermsText"
+                                        Style="{StaticResource NovaTextBoxStyle}"/>
+
+                                </StackPanel>
+
+                            </Grid>
+                            
+                            <!-- Address  -->
+                            <StackPanel
+                                Spacing="4">
+
+                                <TextBlock
+                                    Text="Address"
+                                    FontSize="14"/>
+
+                                <TextBox
+                                    x:Name="VendorAddressText"
+                                    Style="{StaticResource NovaTextBoxStyle}"/>
+
+                            </StackPanel>
+
+                            <!-- Notes -->
+                            <StackPanel
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Spacing="4">
+
+                                <TextBlock
+                                    Text="Notes"
+                                    FontSize="14"/>
+
+                                <TextBox
+                                    x:Name="VendorNotesText"
+                                    Style="{StaticResource NovaTextBoxStyle}"
+                                    AcceptsReturn="True"
+                                    TextWrapping="Wrap"
+                                    MinHeight="100"
+                                    VerticalContentAlignment="Top"/>
+
+                            </StackPanel>
+
+                            <Button
+                                Margin="0,12,0,0"
+                                HorizontalAlignment="Right"
+                                Content="Save Vendor"
+                                Background="#6F5AA8"
+                                Foreground="White"
+                                Click="SaveVendor_Click"/>
+
+                        </StackPanel>
+                            
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        Padding="16"
+                        CornerRadius="10"
+                        BorderThickness="1"
+                        Background="#1B1B20"
+                        BorderBrush="#4E426F">
+
+                        <StackPanel
+                            Orientation="Vertical"
+                            HorizontalAlignment="Stretch"
+                            Spacing="12">
+
+                            <!-- Right Column Title -->
+                            <TextBlock
+                                Text="Parts Supplied"
+                                FontSize="20"
+                                Foreground="#B9A7FF"
+                                FontWeight="SemiBold"
+                                Margin="0,0,0,8"/>
+
+                            <!-- Search Parts -->
+                            <TextBox
+                                x:Name="VendorPartSearchBar"
+                                PlaceholderText="Search parts..."
+                                HorizontalAlignment="Stretch"
+                                Style="{StaticResource NovaTextBoxStyle}"/>
+
+                            <!-- Part List -->
+                            <StackPanel
+                                Spacing="4">
+
+                                <TextBlock
+                                    Text="Part List"
+                                    FontSize="18"/>
+
+                                <ListView
+                                    x:Name="VendorPartList"
+                                    MinHeight="140"
+                                    MaxHeight="220"
+                                    SelectionChanged="VendorPartList_SelectionChanged">
+
+                                </ListView>
+
+                            </StackPanel>
+
+                            <!-- Selected Part -->
+                            <StackPanel
+                                Margin="0,8,0,0"
+                                Spacing="10">
+
+                                <TextBlock
+                                    x:Name="SelectedVendorPartText"
+                                    Text="Selected Part"
+                                    FontSize="18"/>
+
+                                <!-- Vendor Part Number -->
+                                <StackPanel
+                                    HorizontalAlignment="Left"
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        Text="Vendor Part Number"
+                                        FontSize="14"/>
+
+                                    <TextBox
+                                        x:Name="VendorPartNumberText"
+                                        Style="{StaticResource NovaTextBoxStyle}"
+                                        HorizontalAlignment="Stretch"
+                                        MaxWidth="200"/>
+
+                                </StackPanel>
+
+                                <!-- Latest Cost -->
+                                <StackPanel
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        Text="Latest Cost"
+                                        FontSize="14"/>
+
+                                    <TextBlock
+                                        x:Name="LatestVendorCostText"
+                                        Text="$0.00"
+                                        FontSize="18"/>
+
+                                </StackPanel>
+
+                                <!-- Cost History -->
+                                <StackPanel
+                                    Spacing="4">
+
+                                    <TextBlock
+                                        Text="Cost History"
+                                        FontSize="14"/>
+
+                                    <ListView
+                                        x:Name="VendorPriceHistoryList"
+                                        MinHeight="90"
+                                        MaxHeight="160">
+
+                                    </ListView>
+
+                                </StackPanel>
+
+                                <!-- Add Cost -->
+                                <Button
+                                    Content="Add Cost"
+                                    HorizontalAlignment="Left"
+                                    Background="Transparent"
+                                    BorderBrush="#6F5AA8"
+                                    BorderThickness="1"
+                                    Foreground="#D8D0F0"
+                                    Click="AddVendorCost_Click"/>
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </Border>
+                    
+                </Grid>
+
+            </StackPanel>
+            
+        </Grid>
+        
+    </Grid>
+    
+</Page>

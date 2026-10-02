@@ -1,0 +1,14 @@
+.vs/
+bin/
+obj/
+
+*.db
+*.db-shm
+*.db-wal
+
+*.user
+*.suo
+
+# Never commit legacy FLEX/business data
+*.DAT
+*.K*

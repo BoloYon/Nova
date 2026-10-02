@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Nova.Data/Nova.Data.csproj" Id="2d79cbe4-a10a-4ece-86bb-f1521ea886ba" />
+  <Project Path="Nova/Nova.csproj">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
+</Solution>
