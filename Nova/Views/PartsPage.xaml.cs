@@ -31,6 +31,9 @@ namespace Nova.Views
     /// </summary>
     public sealed partial class PartsPage : Page
     {
+        private Part? _selectedPart = null;
+        private Company? _selectedCompany = null;
+
         public PartsPage()
         {
             InitializeComponent();
@@ -54,17 +57,8 @@ namespace Nova.Views
             //Change the Selected Company
             SelectedCompanyText.Text = $"Selected Company: {selectedCompany.Content}";
 
-            if (selectedCompany.Content.ToString() == "Ford")
-            {
-                CompanyPartNumberText.Text = "X2312";
-                LatestCostText.Text = "5.00";
-            }
-
-            else if (selectedCompany.Content.ToString() == "Chevy")
-            {
-                CompanyPartNumberText.Text = "X1234";
-                LatestCostText.Text = "10.00";
-            }
+            //Grab the company obj from the tag
+            _selectedCompany = selectedCompany.Tag as Company;
 
         }
 
@@ -142,18 +136,12 @@ namespace Nova.Views
             context.Parts.Add(p);
 
             //Attempt to save
-            try
+            if (await TrySaveToDB(context, saveDialog, message, $"{p.PartName}"))
             {
-                context.SaveChanges();
-                saveDialog.Title = "SUCCESS";
-                message.Text = $"'{p.PartName}' was saved.";
+                _selectedPart = p;
             }
-            catch (DbUpdateException)
-            {
-                message.Text = $"'{p.PartName}' was not saved.";
-            }
+
             
-            await saveDialog.ShowAsync();
             
         }
 
@@ -249,8 +237,139 @@ namespace Nova.Views
             }
         }
 
+        private async void SaveRelation_Click(object sender, RoutedEventArgs e)
+        {
+            //Make a part company obj
+            PartCompany pc = new PartCompany();
+
+            //Create Dialog
+            ContentDialog relationDialog = DialogHelper.CreateDialog("TEMPORARY", "", "Okay", this.XamlRoot);
+
+            //Create message
+            TextBlock message = new TextBlock();
+            message.Text = "";
+
+            relationDialog.Content = message;
+
+            //Safety check
+            if (_selectedPart == null)
+            {
+                message.Text = "You must select a part before adding a relationship.";
+
+            }
+            else if (_selectedCompany == null)
+            {
+                message.Text = "You must select a company before adding a relationship.";
+            }
+            else if (RelationshipTypeComboBox.SelectedItem == null)
+            {
+                message.Text = "A relationship must be selected.";
+            }
+
+            //Show error dialog
+            if (message.Text != "")
+            {
+                relationDialog.Title = "ERROR";
+                await relationDialog.ShowAsync();
+                return;
+            }
+
+            //Get relationship type from combo box
+            ComboBoxItem selectedRelation = (ComboBoxItem)RelationshipTypeComboBox.SelectedItem!;
+            string relation = selectedRelation.Content.ToString()!;
+
+            //Update customer & vendor bools
+            if (!UpdateCompanyBooleans(relation))
+            {
+                relationDialog.Title = "ERROR";
+                message.Text = "Company update failed. Please try again.";
+                await relationDialog.ShowAsync();
+
+                return;
+            }
+
+
+
+            //Initialize pc properties
+            pc.PartId = _selectedPart!.Id;
+            pc.CompanyId = _selectedCompany!.Id;
+            pc.CompanyPartNumber = CompanyPartNumberText.Text.Trim();
+            pc.RelationshipType = relation;
+
+            using NovaDbContext context = new NovaDbContext();
+            context.PartCompanies.Add(pc);
+
+            await TrySaveToDB(context, relationDialog, message, $"{_selectedPart.PartName} ↔ {_selectedCompany.Name} relationship");
+            
+        }
+
 
         //HELPERS
+
+        //Changes the customer and vendor booleans in a company obj
+        private bool UpdateCompanyBooleans(String relation)
+        {
+
+            //Safety check
+            if (_selectedCompany == null)
+            {
+                return false;
+            }
+            else if (relation == null)
+            {
+                return false;
+            }
+
+            //Update relation(s)
+            if (relation == "Customer")
+            {
+                _selectedCompany.IsCustomer = true;
+            }
+            else if (relation == "Vendor")
+            {
+                _selectedCompany.IsVendor = true;
+            }
+            else if (relation == "Both")
+            {
+                _selectedCompany.IsCustomer = true;
+                _selectedCompany.IsVendor = true;
+            }
+
+            using NovaDbContext context = new NovaDbContext();
+            context.Companies.Update(_selectedCompany);
+
+            try
+            {
+                context.SaveChanges();
+                return true;
+            }
+            catch (DbUpdateException)
+            {
+                return false;
+            }
+        }
+
+        //Attempts to save an obj to the database
+        private async Task<bool> TrySaveToDB(NovaDbContext context, ContentDialog dialog, TextBlock msg, string name)
+        {
+            try
+            {
+                context.SaveChanges();
+                dialog.Title = "SUCCESS";
+                msg.Text = $"'{name}' was saved.";
+
+                await dialog.ShowAsync();
+                return true;
+            }
+            catch (DbUpdateException)
+            {
+                dialog.Title = "ERROR";
+                msg.Text = $"'{name}' was not saved.";
+
+                await dialog.ShowAsync();
+                return false;
+            }
+        }
 
         //Checks if date is valid
         private static bool TryParseDateEntry(string date, out DateTime parsedDate)
@@ -305,6 +424,12 @@ namespace Nova.Views
             CompanyPartNumberText.Text = "";
             LatestCostText.Text = "";
             PriceHistoryList.Items.Clear();
+            RelationshipTypeComboBox.SelectedItem = null;
+
+            //Clear selected part and company
+            _selectedPart = null;
+            _selectedCompany = null;
+            
         }
 
         //Populates the company list

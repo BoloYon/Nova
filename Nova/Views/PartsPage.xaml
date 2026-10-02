@@ -354,8 +354,14 @@
                                 <StackPanel Spacing="4">
 
                                     <TextBlock
-                                        Text="Relationship Type"
-                                        FontSize="14"/>
+                                        FontSize="14">
+                                        
+                                        <Run Text="Relationship Type"/>
+                                        <Run
+                                            Text="*"
+                                            Foreground="Red"/>
+
+                                    </TextBlock>
 
                                     <ComboBox
                                         x:Name="RelationshipTypeComboBox"
@@ -385,6 +391,14 @@
                                         MaxWidth="200"/>
 
                                 </StackPanel>
+
+                                <Button
+                                    Content="Save Relation"
+                                    HorizontalAlignment="Left"
+                                    Background="#6F5AA8"
+                                    Foreground="White"
+                                    Margin="0,0,0,8"
+                                    Click="SaveRelation_Click"/>
 
                                 <!-- Latest Cost and Price History -->
                                 <StackPanel Spacing="4">
@@ -421,6 +435,7 @@
 
 
                         </StackPanel>
+                        
                     </Border>
 
                 </Grid>
