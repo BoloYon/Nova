@@ -35,18 +35,36 @@
                 Spacing="12"
                 Margin="0,12,0,20">
 
-                <TextBox
-                    PlaceholderText="Search parts..."
-                    Width="380"
-                    Style="{StaticResource NovaTextBoxStyle}"/>
+                <StackPanel>
+                    
+                    <StackPanel
+                        Spacing="12"
+                        Orientation="Horizontal">
+                        <TextBox
+                            x:Name="PartSearchBar"
+                            PlaceholderText="Search parts..."
+                            Width="380"
+                            Style="{StaticResource NovaTextBoxStyle}"
+                            TextChanged="PartSearchBar_TextChanged"/>
 
-                <Button
-                    Content="New Part"
-                    Background="Transparent"
-                    BorderBrush="#6F5AA8"
-                    BorderThickness="1"
-                    Foreground="#D8D0F0"
-                    Click="NewPart_Click"/>
+                        <Button
+                            Content="New Part"
+                            Background="Transparent"
+                            BorderBrush="#6F5AA8"
+                            BorderThickness="1"
+                            Foreground="#D8D0F0"
+                            Click="NewPart_Click"/>
+                    
+                    </StackPanel>
+
+                    <ListView
+                        x:Name="PartSearchResults"
+                        Width="380"
+                        MaxHeight="200"
+                        HorizontalAlignment="Left"
+                        SelectionChanged="PartSearchResult_SelectionChanged"/>
+
+                </StackPanel>
 
             </StackPanel>
 

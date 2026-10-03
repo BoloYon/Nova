@@ -18,26 +18,49 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Background;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace Nova.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class PartsPage : Page
     {
         private Part? _selectedPart = null;
         private Company? _selectedCompany = null;
+        private PartCompany? _selectedPartCompany = null;
 
         public PartsPage()
         {
             InitializeComponent();
             LoadCompanies();
+        }
+
+        private void PartSearchBar_TextChanged(object sender, TextChangedEventArgs args)
+        {
+            SearchParts();
+        }
+
+        private void PartSearchResult_SelectionChanged(object sender, SelectionChangedEventArgs args)
+        {
+            ListView searchList = (ListView)sender;
+
+            ListViewItem? item = searchList.SelectedItem as ListViewItem;
+
+            if (item == null)
+            {
+                return;
+            }
+
+            _selectedPart = (Part)item.Tag;
+
+            PopulatePartFields();
+
+            //Populate relationship fields once both a part and company are selected
+            if (_selectedCompany != null && _selectedPart != null)
+            {
+                PopulateCompanyFields();
+            }
         }
 
         private void CompanyList_SelectionChanged(object sender, SelectionChangedEventArgs args)
@@ -60,6 +83,12 @@ namespace Nova.Views
             //Grab the company obj from the tag
             _selectedCompany = selectedCompany.Tag as Company;
 
+            //Populate relationship fields once both a part and company are selected
+            if (_selectedCompany != null && _selectedPart != null)
+            {
+                PopulateCompanyFields();
+            }
+
         }
 
         private async void NewPart_Click(object sender, RoutedEventArgs args)
@@ -70,11 +99,8 @@ namespace Nova.Views
             }
         }
 
-        //Makes a new part object
         private async void SavePart_Click(object sender, RoutedEventArgs args)
         {
-            //Create the part obj
-            Part p = new Part();
 
             //Create dialog. Title and message will change depending on success/ error
             ContentDialog saveDialog = DialogHelper.CreateDialog("Temporary", "", "Okay", this.XamlRoot);
@@ -118,31 +144,16 @@ namespace Nova.Views
                 await saveDialog.ShowAsync();
                 return;
             }
-            
-            //Initialize all part properties
-            p.PartName = PartNameText.Text;
-            p.PrimaryPartNumber = PrimaryPartNumberText.Text.Trim();
-            p.Description = DescriptionText.Text.Trim();
-            p.UnitType = UnitTypeText.Text.Trim();
-            p.ShipWeight = shipWeight;
-            p.CubicFeet = cubicFeet;
-            p.DrawingOnFile = DrawingOnFileCheckBox.IsChecked == true;
-            p.MoldAvailable = MoldAvailableCheckBox.IsChecked == true;
-            p.Notes = NotesText.Text.Trim();
 
-            //Create a context  and add the new part obj
-            using NovaDbContext context = new NovaDbContext();
-
-            context.Parts.Add(p);
-
-            //Attempt to save
-            if (await TrySaveToDB(context, saveDialog, message, $"{p.PartName}"))
+            //Determine if creation or update
+            if (_selectedPart == null)
             {
-                _selectedPart = p;
+                await CreatePartEntry(saveDialog, message, shipWeight, cubicFeet);
             }
-
-            
-            
+            else
+            {
+                await UpdatePartEntry(saveDialog, message, shipWeight, cubicFeet);
+            }
         }
 
         private async void AddPriceEntry_Click(object sender, RoutedEventArgs args)
@@ -151,7 +162,6 @@ namespace Nova.Views
             //Make a new dialog object
             ContentDialog addPriceDialog = DialogHelper.CreateDialog("Add Price Entry", "Add", "Cancel", this.XamlRoot);
             
-
             //Make the actual content for the dialog
             StackPanel dialogContent = new StackPanel();
             dialogContent.Spacing = 8;
@@ -239,9 +249,6 @@ namespace Nova.Views
 
         private async void SaveRelation_Click(object sender, RoutedEventArgs e)
         {
-            //Make a part company obj
-            PartCompany pc = new PartCompany();
-
             //Create Dialog
             ContentDialog relationDialog = DialogHelper.CreateDialog("TEMPORARY", "", "Okay", this.XamlRoot);
 
@@ -275,8 +282,7 @@ namespace Nova.Views
             }
 
             //Get relationship type from combo box
-            ComboBoxItem selectedRelation = (ComboBoxItem)RelationshipTypeComboBox.SelectedItem!;
-            string relation = selectedRelation.Content.ToString()!;
+            string relation = RelationshipTypeComboBox.Text;
 
             //Update customer & vendor bools
             if (!UpdateCompanyBooleans(relation))
@@ -288,23 +294,121 @@ namespace Nova.Views
                 return;
             }
 
+            PartCompany? pc = FindExistingLink();
 
-
-            //Initialize pc properties
-            pc.PartId = _selectedPart!.Id;
-            pc.CompanyId = _selectedCompany!.Id;
-            pc.CompanyPartNumber = CompanyPartNumberText.Text.Trim();
-            pc.RelationshipType = relation;
-
-            using NovaDbContext context = new NovaDbContext();
-            context.PartCompanies.Add(pc);
-
-            await TrySaveToDB(context, relationDialog, message, $"{_selectedPart.PartName} ↔ {_selectedCompany.Name} relationship");
+            //No link found
+            if (pc == null)
+            {
+                _selectedPartCompany = null;
+                await CreatePartCompanyEntry(relationDialog, message, relation);
+            }
+            else
+            {
+                _selectedPartCompany = pc;
+                await UpdatePartCompanyEntry(relationDialog, message, relation);
+            }
             
         }
 
 
         //HELPERS
+
+        //Populates the search bar result list using filtered text
+        private void SearchParts()
+        {
+            PartSearchResults.Items.Clear();
+
+            using NovaDbContext context = new NovaDbContext();
+
+            String searchStr = PartSearchBar.Text.Trim().ToLower();
+
+            //Show nothing on empty search
+            if (searchStr == "")
+            {
+                return;
+            }
+
+            //Search each part for partname and part number
+            foreach (Part part in context.Parts)
+            {
+                String partName = part.PartName.ToLower();
+                String partNumber = part.PrimaryPartNumber.ToLower(); //(PPN's can contain letters)
+
+                if (partName.Contains(searchStr) || partNumber.Contains(searchStr))
+                {
+                    ListViewItem item = new ListViewItem();
+
+                    item.Content = $"{part.PrimaryPartNumber} - {part.PartName}";
+
+                    //Save part obj
+                    item.Tag = part;
+
+                    PartSearchResults.Items.Add(item);
+                }
+            }
+        }
+
+        //Populates all the left fields on the parts page
+        private void PopulatePartFields()
+        {
+            if (_selectedPart == null)
+            {
+                return;
+            }
+
+            PartNameText.Text = _selectedPart.PartName;
+            PrimaryPartNumberText.Text = _selectedPart.PrimaryPartNumber;
+            UnitTypeText.Text = _selectedPart.UnitType;
+            ShipWeightText.Text = _selectedPart.ShipWeight.ToString();
+            CubicFeetText.Text = _selectedPart.CubicFeet.ToString();
+            DrawingOnFileCheckBox.IsChecked = _selectedPart.DrawingOnFile;
+            MoldAvailableCheckBox.IsChecked = _selectedPart.MoldAvailable;
+            DescriptionText.Text = _selectedPart.Description;
+            NotesText.Text = _selectedPart.Notes;
+
+        }
+
+        //Populates all the fields on the right side of the parts page
+        private void PopulateCompanyFields()
+        {
+            //Look for an existing connection
+            PartCompany? pc = FindExistingLink();
+
+            //New connection, no fields to populate
+            if (pc == null)
+            {
+                RelationshipTypeComboBox.Text = "";
+                CompanyPartNumberText.Text = "";
+                return;
+            }
+
+            //Loop through each item to find the matching combo box item
+            foreach (ComboBoxItem item in RelationshipTypeComboBox.Items)
+            {
+                if (item.Content.ToString() == pc.RelationshipType)
+                {
+                    RelationshipTypeComboBox.SelectedItem = item;
+                }
+            }
+
+            CompanyPartNumberText.Text = pc.CompanyPartNumber;
+        }
+
+        //Finds an existing link between a part and a company
+        private PartCompany? FindExistingLink()
+        {
+            using NovaDbContext context = new NovaDbContext();
+
+            foreach (PartCompany pc in context.PartCompanies)
+            {
+                if (pc.CompanyId == _selectedCompany!.Id && pc.PartId == _selectedPart!.Id)
+                {
+                    return pc;
+                }
+            }
+
+            return null;
+        }
 
         //Changes the customer and vendor booleans in a company obj
         private bool UpdateCompanyBooleans(String relation)
@@ -369,6 +473,114 @@ namespace Nova.Views
                 await dialog.ShowAsync();
                 return false;
             }
+        }
+
+        //Creates an entire part entry
+        private async Task CreatePartEntry(ContentDialog saveDialog, TextBlock message, decimal shipWeight, decimal cubicFeet)
+        {
+            //Create the part obj
+            Part p = new Part();
+
+            //Initialize all part properties
+            p.PartName = PartNameText.Text;
+            p.PrimaryPartNumber = PrimaryPartNumberText.Text.Trim();
+            p.Description = DescriptionText.Text.Trim();
+            p.UnitType = UnitTypeText.Text.Trim();
+            p.ShipWeight = shipWeight;
+            p.CubicFeet = cubicFeet;
+            p.DrawingOnFile = DrawingOnFileCheckBox.IsChecked == true;
+            p.MoldAvailable = MoldAvailableCheckBox.IsChecked == true;
+            p.Notes = NotesText.Text.Trim();
+
+            //Create a context  and add the new part obj
+            using NovaDbContext context = new NovaDbContext();
+
+            context.Parts.Add(p);
+
+            //Attempt to save
+            if (await TrySaveToDB(context, saveDialog, message, $"{p.PartName}"))
+            {
+                _selectedPart = p;
+            }
+        }
+
+        //Updates an existing part entry
+        private async Task UpdatePartEntry(ContentDialog saveDialog, TextBlock message, decimal shipWeight, decimal cubicFeet)
+        {
+            Part p = _selectedPart!;
+
+            p.PartName = PartNameText.Text;
+            p.PrimaryPartNumber = PrimaryPartNumberText.Text.Trim();
+            p.Description = DescriptionText.Text.Trim();
+            p.UnitType = UnitTypeText.Text.Trim();
+            p.ShipWeight = shipWeight;
+            p.CubicFeet = cubicFeet;
+            p.DrawingOnFile = DrawingOnFileCheckBox.IsChecked == true;
+            p.MoldAvailable = MoldAvailableCheckBox.IsChecked == true;
+            p.Notes = NotesText.Text.Trim();
+
+            //Create a context  and add the new part obj
+            using NovaDbContext context = new NovaDbContext();
+
+            try
+            {
+                context.Parts.Update(p);
+                context.SaveChanges();
+
+                saveDialog.Title = "SUCCESS";
+                message.Text = $"'{p.PartName}' was updated successfully.";
+            }
+            catch (DbUpdateException)
+            {
+                saveDialog.Title = "ERROR";
+                message.Text = $"'{p.PartName}' was not updated.";
+            }
+
+            await saveDialog.ShowAsync();
+        }
+
+        //Creates a new PartCompany entry
+        private async Task CreatePartCompanyEntry(ContentDialog relationDialog, TextBlock message, String relation)
+        {
+            //Make a part company obj
+            PartCompany pc = new PartCompany();
+
+            //Initialize pc properties
+            pc.PartId = _selectedPart!.Id;
+            pc.CompanyId = _selectedCompany!.Id;
+            pc.CompanyPartNumber = CompanyPartNumberText.Text.Trim();
+            pc.RelationshipType = relation;
+
+            using NovaDbContext context = new NovaDbContext();
+            context.PartCompanies.Add(pc);
+
+            await TrySaveToDB(context, relationDialog, message, $"{_selectedPart.PartName} ↔ {_selectedCompany.Name} relationship");
+        }
+
+        //Updates existing PartCompany entry
+        private async Task UpdatePartCompanyEntry(ContentDialog relationDialog, TextBlock message, String relation)
+        {
+            PartCompany pc = _selectedPartCompany!;
+
+            pc.RelationshipType = relation;
+            pc.CompanyPartNumber = CompanyPartNumberText.Text.Trim();
+
+            using NovaDbContext context = new NovaDbContext();
+
+            try
+            {
+                context.PartCompanies.Update(pc);
+                context.SaveChanges();
+                relationDialog.Title = "SUCCESS";
+                message.Text = $"Relationship between {_selectedPart!.PartName} and {_selectedCompany!.Name} was successfully updated.";
+            }
+            catch (DbUpdateException)
+            {
+                relationDialog.Title = "ERROR";
+                message.Text = $"Relationship between {_selectedPart!.PartName} and {_selectedCompany!.Name} was not updated.";
+            }
+
+            await relationDialog.ShowAsync();
         }
 
         //Checks if date is valid
