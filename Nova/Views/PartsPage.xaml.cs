@@ -38,9 +38,15 @@ namespace Nova.Views
 
         private void PartSearchBar_TextChanged(object sender, TextChangedEventArgs args)
         {
-            SearchParts();
-        }
+            using NovaDbContext context = new NovaDbContext();
 
+            SearchHelper.LoadSearchList(PartSearchResults, context.Parts, PartSearchBar.Text);
+        }
+        private void CompanySearchBar_TextChanged(object sender, TextChangedEventArgs args)
+        {
+            using NovaDbContext context = new NovaDbContext();
+            SearchHelper.LoadSearchList(CompanyList, context.Companies, CompanySearchBar.Text, hideOnEmpty: false);
+        }
         private void PartSearchResult_SelectionChanged(object sender, SelectionChangedEventArgs args)
         {
             ListView searchList = (ListView)sender;
@@ -72,16 +78,23 @@ namespace Nova.Views
             ListViewItem? selectedCompany = CompanyList.SelectedItem as ListViewItem;
 
             //Safety Check
-            if (selectedCompany == null)
+            if (selectedCompany == null || selectedCompany.Tag as Company == null)
             {
                 return;
             }
 
-            //Change the Selected Company
-            SelectedCompanyText.Text = $"Selected Company: {selectedCompany.Content}";
-
             //Grab the company obj from the tag
             _selectedCompany = selectedCompany.Tag as Company;
+
+            //Change the Selected Company
+            if (!string.IsNullOrWhiteSpace(_selectedCompany!.ContactName))
+            {
+                SelectedCompanyText.Text = $"{_selectedCompany.Name} - {_selectedCompany.ContactName}";
+            }
+            else
+            {
+                SelectedCompanyText.Text = _selectedCompany.Name;
+            }
 
             //Populate relationship fields once both a part and company are selected
             if (_selectedCompany != null && _selectedPart != null)
@@ -259,14 +272,10 @@ namespace Nova.Views
             relationDialog.Content = message;
 
             //Safety check
-            if (_selectedPart == null)
+            if (_selectedPart == null || _selectedCompany == null)
             {
-                message.Text = "You must select a part before adding a relationship.";
+                message.Text = "Part and Company must BOTH be selected before saving a relationship.";
 
-            }
-            else if (_selectedCompany == null)
-            {
-                message.Text = "You must select a company before adding a relationship.";
             }
             else if (RelationshipTypeComboBox.SelectedItem == null)
             {
@@ -282,7 +291,8 @@ namespace Nova.Views
             }
 
             //Get relationship type from combo box
-            string relation = RelationshipTypeComboBox.Text;
+            ComboBoxItem selectedRelation = (ComboBoxItem)RelationshipTypeComboBox.SelectedItem!;
+            string relation = selectedRelation.Content.ToString()!;
 
             //Update customer & vendor bools
             if (!UpdateCompanyBooleans(relation))
@@ -294,18 +304,24 @@ namespace Nova.Views
                 return;
             }
 
-            PartCompany? pc = FindExistingLink();
+            PartCompany? pc = LinkHelper.FindExistingLink(_selectedPart!, _selectedCompany!);
+            bool success;
 
-            //No link found
+            //Create new link
             if (pc == null)
             {
-                _selectedPartCompany = null;
-                await CreatePartCompanyEntry(relationDialog, message, relation);
+                pc = await LinkHelper.CreateNewLink(this.XamlRoot, CompanyPartNumberText.Text, _selectedCompany!.Id, _selectedPart!.Id, relation);
+                success = (pc != null);
             }
+            //Edit existing link
             else
             {
+                success = await LinkHelper.UpdateLink(this.XamlRoot, CompanyPartNumberText.Text, pc, relation, LinkHelper.PageType.Part);
+            }
+
+            if (success)
+            {
                 _selectedPartCompany = pc;
-                await UpdatePartCompanyEntry(relationDialog, message, relation);
             }
             
         }
@@ -372,13 +388,16 @@ namespace Nova.Views
         private void PopulateCompanyFields()
         {
             //Look for an existing connection
-            PartCompany? pc = FindExistingLink();
+            PartCompany? pc = LinkHelper.FindExistingLink(_selectedPart!, _selectedCompany!);
 
             //New connection, no fields to populate
             if (pc == null)
             {
-                RelationshipTypeComboBox.Text = "";
+                RelationshipTypeComboBox.SelectedItem = null;
                 CompanyPartNumberText.Text = "";
+                LatestCostText.Text = "$0.00";
+                PriceHistoryList.Items.Clear();
+                _selectedPartCompany = null;
                 return;
             }
 
@@ -392,23 +411,9 @@ namespace Nova.Views
             }
 
             CompanyPartNumberText.Text = pc.CompanyPartNumber;
+            _selectedPartCompany = pc;
         }
 
-        //Finds an existing link between a part and a company
-        private PartCompany? FindExistingLink()
-        {
-            using NovaDbContext context = new NovaDbContext();
-
-            foreach (PartCompany pc in context.PartCompanies)
-            {
-                if (pc.CompanyId == _selectedCompany!.Id && pc.PartId == _selectedPart!.Id)
-                {
-                    return pc;
-                }
-            }
-
-            return null;
-        }
 
         //Changes the customer and vendor booleans in a company obj
         private bool UpdateCompanyBooleans(String relation)
@@ -539,50 +544,6 @@ namespace Nova.Views
             await saveDialog.ShowAsync();
         }
 
-        //Creates a new PartCompany entry
-        private async Task CreatePartCompanyEntry(ContentDialog relationDialog, TextBlock message, String relation)
-        {
-            //Make a part company obj
-            PartCompany pc = new PartCompany();
-
-            //Initialize pc properties
-            pc.PartId = _selectedPart!.Id;
-            pc.CompanyId = _selectedCompany!.Id;
-            pc.CompanyPartNumber = CompanyPartNumberText.Text.Trim();
-            pc.RelationshipType = relation;
-
-            using NovaDbContext context = new NovaDbContext();
-            context.PartCompanies.Add(pc);
-
-            await TrySaveToDB(context, relationDialog, message, $"{_selectedPart.PartName} ↔ {_selectedCompany.Name} relationship");
-        }
-
-        //Updates existing PartCompany entry
-        private async Task UpdatePartCompanyEntry(ContentDialog relationDialog, TextBlock message, String relation)
-        {
-            PartCompany pc = _selectedPartCompany!;
-
-            pc.RelationshipType = relation;
-            pc.CompanyPartNumber = CompanyPartNumberText.Text.Trim();
-
-            using NovaDbContext context = new NovaDbContext();
-
-            try
-            {
-                context.PartCompanies.Update(pc);
-                context.SaveChanges();
-                relationDialog.Title = "SUCCESS";
-                message.Text = $"Relationship between {_selectedPart!.PartName} and {_selectedCompany!.Name} was successfully updated.";
-            }
-            catch (DbUpdateException)
-            {
-                relationDialog.Title = "ERROR";
-                message.Text = $"Relationship between {_selectedPart!.PartName} and {_selectedCompany!.Name} was not updated.";
-            }
-
-            await relationDialog.ShowAsync();
-        }
-
         //Checks if date is valid
         private static bool TryParseDateEntry(string date, out DateTime parsedDate)
         {
@@ -618,6 +579,9 @@ namespace Nova.Views
         //Clears every input field on the parts page
         private void ClearAllFields()
         {
+            PartSearchBar.Text = "";
+            PartSearchResults.Items.Clear();
+
             //Clear left side
             PartNameText.Text = "";
             PrimaryPartNumberText.Text = "";
@@ -632,7 +596,9 @@ namespace Nova.Views
             //Clear right side
             CompanySearchBar.Text = "";
             CompanyList.Items.Clear();
-            SelectedCompanyText.Text = "Selected Company";
+            LoadCompanies();
+
+            SelectedCompanyText.Text = "No Company Selected";
             CompanyPartNumberText.Text = "";
             LatestCostText.Text = "";
             PriceHistoryList.Items.Clear();
@@ -641,7 +607,8 @@ namespace Nova.Views
             //Clear selected part and company
             _selectedPart = null;
             _selectedCompany = null;
-            
+            _selectedPartCompany = null;
+
         }
 
         //Populates the company list
@@ -649,20 +616,9 @@ namespace Nova.Views
         {
             using NovaDbContext context = new NovaDbContext();
 
-            //Clear the list
-            CompanyList.Items.Clear();
+            SearchHelper.LoadSearchList(CompanyList, context.Companies, "", hideOnEmpty: false);
 
-            foreach (Company company in context.Companies)
-            {
-                ListViewItem item = new ListViewItem();
-
-                item.Content = $"{company.CompanyNumber} - {company.Name}";
-
-                //Save the company object as a tag for later referencing
-                item.Tag = company;
-
-                CompanyList.Items.Add(item);
-            }
         }
+
     }
 }

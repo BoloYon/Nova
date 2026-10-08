@@ -33,18 +33,37 @@
                 Spacing="12"
                 Margin="0,12,0,20">
 
-                <TextBox
-                    PlaceholderText="Search vendors..."
-                    Width="380"
-                    Style="{StaticResource NovaTextBoxStyle}"/>
+                <StackPanel>
 
-                <Button
-                    Content="New Vendor"
-                    Background="Transparent"
-                    BorderBrush="#6F5AA8"
-                    BorderThickness="1"
-                    Foreground="#D8D0F0"
-                    Click="NewVendor_Click"/>
+                    <StackPanel
+                        Spacing="12"
+                        Orientation="Horizontal">
+
+                        <TextBox
+                            x:Name="VendorSearchBar"
+                            PlaceholderText="Search vendors..."
+                            Width="380"
+                            Style="{StaticResource NovaTextBoxStyle}"
+                            TextChanged="VendorSearchBar_TextChanged"/>
+
+                        <Button
+                            Content="New Vendor"
+                            Background="Transparent"
+                            BorderBrush="#6F5AA8"
+                            BorderThickness="1"
+                            Foreground="#D8D0F0"
+                            Click="NewVendor_Click"/>
+
+                    </StackPanel>
+
+                    <ListView
+                        x:Name="VendorSearchResults"
+                        Width="380"
+                        MaxHeight="200"
+                        HorizontalAlignment="Left"
+                        SelectionChanged="VendorSearchResult_SelectionChanged"/>
+
+                </StackPanel>
 
             </StackPanel>
             
@@ -283,7 +302,8 @@
                                 x:Name="VendorPartSearchBar"
                                 PlaceholderText="Search parts..."
                                 HorizontalAlignment="Stretch"
-                                Style="{StaticResource NovaTextBoxStyle}"/>
+                                Style="{StaticResource NovaTextBoxStyle}"
+                                TextChanged="VendorPartSearchBar_TextChanged"/>
 
                             <!-- Part List -->
                             <StackPanel
@@ -310,7 +330,7 @@
 
                                 <TextBlock
                                     x:Name="SelectedVendorPartText"
-                                    Text="Selected Part"
+                                    Text="No Part Selected"
                                     FontSize="18"/>
 
                                 <!-- Vendor Part Number -->
@@ -327,9 +347,19 @@
                                         Style="{StaticResource NovaTextBoxStyle}"
                                         HorizontalAlignment="Stretch"
                                         MaxWidth="200"/>
-
+                                    
                                 </StackPanel>
 
+                                <Button
+                                    Content="Save Number"
+                                    Margin="0,0,0,12"
+                                    HorizontalAlignment="Left"
+                                    Background="Transparent"
+                                    BorderBrush="#6F5AA8"
+                                    BorderThickness="1"
+                                    Foreground="#D8D0F0"
+                                    Click="SaveVendorPartNumber_Click"/>
+                                
                                 <!-- Latest Cost -->
                                 <StackPanel
                                     Spacing="4">

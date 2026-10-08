@@ -341,7 +341,8 @@
                                 x:Name="CompanySearchBar"
                                 Style="{StaticResource NovaTextBoxStyle}"
                                 HorizontalAlignment="Stretch"
-                                PlaceholderText="Search companies..."/>
+                                PlaceholderText="Search companies..."
+                                TextChanged="CompanySearchBar_TextChanged"/>
 
                             <!-- Company List -->
                             <StackPanel Spacing="4">
@@ -365,7 +366,7 @@
 
                                 <TextBlock
                                     x:Name="SelectedCompanyText"
-                                    Text="Selected Company"
+                                    Text="No Company Selected"
                                     FontSize="18"/>
 
                                 <!-- Customer Relationship -->

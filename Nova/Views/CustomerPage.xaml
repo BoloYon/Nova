@@ -29,22 +29,35 @@
             <StackPanel
                 Grid.Row="1"
                 HorizontalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="12"
                 Margin="0,12,0,20">
 
-                <TextBox
-                    PlaceholderText="Search customers..."
-                    Width="380"
-                    Style="{StaticResource NovaTextBoxStyle}"/>
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="12">
 
-                <Button
-                    Content="New Customer"
-                    Background="Transparent"
-                    BorderBrush="#6F5AA8"
-                    BorderThickness="1"
-                    Foreground="#D8D0F0"
-                    Click="NewCustomer_Click"/>
+                    <TextBox
+                        x:Name="CustomerSearchBar"
+                        PlaceholderText="Search customers..."
+                        Width="380"
+                        Style="{StaticResource NovaTextBoxStyle}"
+                        TextChanged="CustomerSearchBar_TextChanged"/>
+
+                    <Button
+                        Content="New Customer"
+                        Background="Transparent"
+                        BorderBrush="#6F5AA8"
+                        BorderThickness="1"
+                        Foreground="#D8D0F0"
+                        Click="NewCustomer_Click"/>
+
+                </StackPanel>
+
+                <ListView
+                    x:Name="CustomerSearchResults"
+                    Width="380"
+                    MaxHeight="200"
+                    HorizontalAlignment="Left"
+                    SelectionChanged="CustomerSearchResult_SelectionChanged"/>
 
             </StackPanel>
 
@@ -172,7 +185,7 @@
 
                             </Grid>
 
-                            <!-- Address  -->
+                            <!-- Address -->
                             <StackPanel
                                 Spacing="4">
 
@@ -188,8 +201,6 @@
 
                             <!-- Notes -->
                             <StackPanel
-                                Grid.Row="0"
-                                Grid.Column="1"
                                 Spacing="4">
 
                                 <TextBlock
@@ -218,6 +229,7 @@
 
                     </Border>
 
+                    <!-- Right -->
                     <Border
                         Grid.Column="1"
                         Padding="16"
@@ -244,7 +256,8 @@
                                 x:Name="CustomerPartSearchBar"
                                 PlaceholderText="Search parts..."
                                 HorizontalAlignment="Stretch"
-                                Style="{StaticResource NovaTextBoxStyle}"/>
+                                Style="{StaticResource NovaTextBoxStyle}"
+                                TextChanged="CustomerPartSearchBar_TextChanged"/>
 
                             <!-- Part List -->
                             <StackPanel
@@ -271,7 +284,7 @@
 
                                 <TextBlock
                                     x:Name="SelectedCustomerPartText"
-                                    Text="Selected Part"
+                                    Text="No Selected Part"
                                     FontSize="18"/>
 
                                 <!-- Customer Part Number -->
@@ -288,6 +301,15 @@
                                         Style="{StaticResource NovaTextBoxStyle}"
                                         HorizontalAlignment="Stretch"
                                         MaxWidth="200"/>
+
+                                    <Button
+                                        Content="Save Part Number"
+                                        HorizontalAlignment="Left"
+                                        Background="Transparent"
+                                        BorderBrush="#6F5AA8"
+                                        BorderThickness="1"
+                                        Foreground="#D8D0F0"
+                                        Click="SaveCustomerPartNumber_Click"/>
 
                                 </StackPanel>
 
