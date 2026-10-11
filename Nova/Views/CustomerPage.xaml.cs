@@ -104,9 +104,16 @@ namespace Nova.Views
 
         }
 
-        private void AddCustomerQuote_Click(object sender, RoutedEventArgs args)
+        private async void AddCustomerQuote_Click(object sender, RoutedEventArgs args)
         {
-
+            if (_selectedCompany == null || _selectedPart == null)
+            {
+                return;
+            }
+            else if (_selectedPartCompany != null)
+            {
+                await PriceHelper.CreatePriceEntry(CustomerQuoteHistoryList, LatestCustomerQuoteText, _selectedPartCompany.Id, this.XamlRoot);
+            }
         }
 
         private void CustomerPartList_SelectionChanged(object sender, SelectionChangedEventArgs args)
@@ -237,12 +244,17 @@ namespace Nova.Views
             if (pc == null)
             {
                 CustomerPartNumberText.Text = "";
+                LatestCustomerQuoteText.Text = "$0.00";
+                CustomerQuoteHistoryList.Items.Clear();
                 _selectedPartCompany = null;
                 return;
             }
             else
             {
                 CustomerPartNumberText.Text = pc.CompanyPartNumber;
+
+                PriceHelper.ReloadPriceHistory(CustomerQuoteHistoryList, LatestCustomerQuoteText, pc.Id, this.XamlRoot);
+
                 _selectedPartCompany = pc;
             }
 

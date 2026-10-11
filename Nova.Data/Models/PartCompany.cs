@@ -18,6 +18,8 @@ namespace Nova.Data.Models
 
         public Part Part { get; set; } = null!;
         public Company Company { get; set; } = null!;
+        
+        public List<Price> PriceHistory { get; set; } = new();
 
     }
 }

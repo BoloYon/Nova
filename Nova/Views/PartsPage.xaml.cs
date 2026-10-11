@@ -171,92 +171,13 @@ namespace Nova.Views
 
         private async void AddPriceEntry_Click(object sender, RoutedEventArgs args)
         {
-
-            //Make a new dialog object
-            ContentDialog addPriceDialog = DialogHelper.CreateDialog("Add Price Entry", "Add", "Cancel", this.XamlRoot);
-            
-            //Make the actual content for the dialog
-            StackPanel dialogContent = new StackPanel();
-            dialogContent.Spacing = 8;
-
-            TextBlock dateLabel = new TextBlock();
-            dateLabel.Text = "Date";
-
-            TextBox dateTextBox = new TextBox();
-            dateTextBox.PlaceholderText = "MM/YYYY";
-
-            TextBlock priceLabel = new TextBlock();
-            priceLabel.Text = "Price";
-
-            TextBox priceTextBox = new TextBox();
-            priceTextBox.PlaceholderText = "0.00";
-
-            TextBlock errorText = new TextBlock();
-            errorText.Text = "";
-            errorText.Foreground = new SolidColorBrush(Colors.Red);
-
-            dialogContent.Children.Add(dateLabel);
-            dialogContent.Children.Add(dateTextBox);
-            dialogContent.Children.Add(priceLabel);
-            dialogContent.Children.Add(priceTextBox);
-            dialogContent.Children.Add(errorText);
-
-
-            //Add content to the dialog
-            addPriceDialog.Content = dialogContent;
-
-            //Save formatted date and time
-            string formattedDate = "";
-            string formattedPrice = "";
-
-            //Add to the click logic event
-            addPriceDialog.PrimaryButtonClick += (dialogSender, dialogArgs) =>
+            if (_selectedCompany == null || _selectedPart == null)
             {
-                //Init errorMessage
-                string errorMessage = "";
-
-                // Check price first so date errors take priority
-                if (TryParsePriceEntry(priceTextBox.Text, out decimal parsedPrice))
-                {
-                    formattedPrice = FormatPrice(parsedPrice);
-                }
-                else
-                {
-                    errorMessage = "Invalid price.";
-                    dialogArgs.Cancel = true;
-                }
-
-                //Check date
-                if (TryParseDateEntry(dateTextBox.Text, out DateTime parsedDate))
-                {
-                    formattedDate = FormatDate(parsedDate);
-                }
-                else
-                {
-                    errorMessage = "Invalid date.";
-                    dialogArgs.Cancel = true;
-                }
-            
-                errorText.Text = errorMessage;
-
                 return;
-;
-            };
-
-            ContentDialogResult result = await addPriceDialog.ShowAsync();
-
-            //If button was "Add"
-            if (result == ContentDialogResult.Primary)
+            }
+            else if (_selectedPartCompany != null)
             {
-                //Create a new price entry
-                ListViewItem newPriceEntry = new ListViewItem();
-
-                newPriceEntry.Content = $"{formattedDate} - {formattedPrice}";
-
-                //Add it to the list
-                PriceHistoryList.Items.Insert(0, newPriceEntry);
-                LatestCostText.Text = formattedPrice;
-
+                await PriceHelper.CreatePriceEntry(PriceHistoryList, LatestCostText, _selectedPartCompany.Id, this.XamlRoot);
             }
         }
 
@@ -411,6 +332,8 @@ namespace Nova.Views
             }
 
             CompanyPartNumberText.Text = pc.CompanyPartNumber;
+            PriceHelper.ReloadPriceHistory(PriceHistoryList, LatestCostText, pc.Id, this.XamlRoot);
+
             _selectedPartCompany = pc;
         }
 
@@ -544,38 +467,6 @@ namespace Nova.Views
             await saveDialog.ShowAsync();
         }
 
-        //Checks if date is valid
-        private static bool TryParseDateEntry(string date, out DateTime parsedDate)
-        {
-            return DateTime.TryParseExact(date,
-                "MM/yyyy",
-                System.Globalization.CultureInfo.InvariantCulture,
-                System.Globalization.DateTimeStyles.None,
-                out parsedDate);
-        }
-
-        //Checks if price is valid
-        private static bool TryParsePriceEntry(string price, out decimal parsedPrice)
-        {
-            return decimal.TryParse(price,
-               System.Globalization.NumberStyles.Currency,
-               System.Globalization.CultureInfo.CurrentCulture,
-               out parsedPrice);
-        }
-
-        //Returns formatted price
-        private static string FormatPrice(decimal price)
-        {
-
-            return price.ToString("C");
-        }
-
-        //Returns formatted date
-        private static string FormatDate(DateTime date)
-        {
-            return date.ToString("MM/yyyy");
-        }
-
         //Clears every input field on the parts page
         private void ClearAllFields()
         {
@@ -600,7 +491,7 @@ namespace Nova.Views
 
             SelectedCompanyText.Text = "No Company Selected";
             CompanyPartNumberText.Text = "";
-            LatestCostText.Text = "";
+            LatestCostText.Text = "$0.00";
             PriceHistoryList.Items.Clear();
             RelationshipTypeComboBox.SelectedItem = null;
 

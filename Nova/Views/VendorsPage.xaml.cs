@@ -48,9 +48,16 @@ namespace Nova.Views
             return;
         }
 
-        private void AddVendorCost_Click(object sender, RoutedEventArgs args)
+        private async void AddVendorCost_Click(object sender, RoutedEventArgs args)
         {
-
+            if (_selectedCompany == null || _selectedPart == null)
+            {
+                return;
+            }
+            else if (_selectedPartCompany != null)
+            {
+                await PriceHelper.CreatePriceEntry(VendorPriceHistoryList, LatestVendorCostText, _selectedPartCompany.Id, this.XamlRoot);
+            }
         }
 
         private void VendorPartList_SelectionChanged(object sender, SelectionChangedEventArgs args)
@@ -311,6 +318,9 @@ namespace Nova.Views
             }
 
             VendorPartNumberText.Text = pc.CompanyPartNumber;
+
+            PriceHelper.ReloadPriceHistory(VendorPriceHistoryList, LatestVendorCostText, pc.Id, this.XamlRoot);
+
             _selectedPartCompany = pc;
         }
 
