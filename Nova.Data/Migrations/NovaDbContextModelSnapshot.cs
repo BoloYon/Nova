@@ -160,6 +160,68 @@ namespace Nova.Data.Migrations
                     b.ToTable("Prices");
                 });
 
+            modelBuilder.Entity("Nova.Data.Models.ProForma", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProformaNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ShippingAddress")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Terms")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("ProFormas");
+                });
+
+            modelBuilder.Entity("Nova.Data.Models.ProFormaItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PartId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProFormaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartId");
+
+                    b.HasIndex("ProFormaId");
+
+                    b.ToTable("ProFormaItems");
+                });
+
             modelBuilder.Entity("Nova.Data.Models.PartCompany", b =>
                 {
                     b.HasOne("Nova.Data.Models.Company", "Company")
@@ -190,9 +252,44 @@ namespace Nova.Data.Migrations
                     b.Navigation("PartCompany");
                 });
 
+            modelBuilder.Entity("Nova.Data.Models.ProForma", b =>
+                {
+                    b.HasOne("Nova.Data.Models.Company", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Nova.Data.Models.ProFormaItem", b =>
+                {
+                    b.HasOne("Nova.Data.Models.Part", "Part")
+                        .WithMany()
+                        .HasForeignKey("PartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Nova.Data.Models.ProForma", "ProForma")
+                        .WithMany("Items")
+                        .HasForeignKey("ProFormaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Part");
+
+                    b.Navigation("ProForma");
+                });
+
             modelBuilder.Entity("Nova.Data.Models.PartCompany", b =>
                 {
                     b.Navigation("PriceHistory");
+                });
+
+            modelBuilder.Entity("Nova.Data.Models.ProForma", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

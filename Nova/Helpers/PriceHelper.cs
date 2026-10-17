@@ -80,9 +80,6 @@ namespace Nova.Helpers
             //If Validation failed
             if (pr == null)
             {
-                dialog.Title = "ERROR";
-                msg.Text = "Validation failed. Please double check your inputs.";
-                await dialog.ShowAsync();
                 return;
             }
 
@@ -125,18 +122,14 @@ namespace Nova.Helpers
             }
         }
 
-
-
-        //HELPER FUNCTIONS:
-
         //Fetches the latest price and returns the formatted version
-        private static string GetLatestPrice(int id)
+        public static string GetLatestPrice(int pcId)
         {
             using NovaDbContext context = new NovaDbContext();
 
             foreach (Price p in context.Prices.OrderByDescending(p => p.Date))
             {
-                if (id == p.PartCompanyId)
+                if (pcId == p.PartCompanyId)
                 {
                     return p.Amount.ToString("C");
                 }
@@ -144,6 +137,9 @@ namespace Nova.Helpers
 
             return "$0.00";
         }
+
+
+        //HELPER FUNCTIONS:
 
         //Makes a price dialog then validates and attempts to correct price and date inputs. Returns corrected price results or null if attempt failed.
         private static async Task<PriceResult?> CreateAndValidatePriceDialog(XamlRoot xaml)
@@ -192,8 +188,19 @@ namespace Nova.Helpers
             {
                 return pr;
             }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                return null;
+            }
+            else if (pr == null)
+            {
+                dParts.Dialog.Title = "ERROR";
+                dParts.ErrorText.Text = "Validation failed. Please double check your inputs.";
+                await dParts.Dialog.ShowAsync();
+                return null;
+            }
 
-            return null;
+            return null; //Redundant, but the method was throwing a fit
         }
 
         //Adds a ListViewItem with price text and a delete button
@@ -264,7 +271,7 @@ namespace Nova.Helpers
         }
         
         //Checks if date is valid
-        private static bool TryParseDateEntry(string date, out DateTime parsedDate)
+        public static bool TryParseDateEntry(string date, out DateTime parsedDate)
         {
             return DateTime.TryParseExact(date,
                 "MM/yyyy",
@@ -274,7 +281,7 @@ namespace Nova.Helpers
         }
 
         //Checks if price is valid
-        private static bool TryParsePriceEntry(string price, out decimal parsedPrice)
+        public static bool TryParsePriceEntry(string price, out decimal parsedPrice)
         {
             return decimal.TryParse(price,
                System.Globalization.NumberStyles.Currency,

@@ -15,6 +15,8 @@ namespace Nova.Data
         public DbSet<Company> Companies { get; set; }
         public DbSet<PartCompany> PartCompanies { get; set; }
         public DbSet<Price> Prices { get; set; }
+        public DbSet<ProForma> ProFormas { get; set; }
+        public DbSet<ProFormaItem> ProFormaItems { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Nova.Views.ProFormaPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Nova.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="#121217"
+          Padding="28">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <Grid Grid.Row="0"
+              Margin="0,0,0,22">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <TextBlock Text="Pro Formas"
+                           FontSize="30"
+                           FontWeight="SemiBold"
+                           Foreground="White"/>
+
+                <TextBlock Text="Create and manage pro forma invoices"
+                           Margin="0,4,0,0"
+                           Foreground="#9E9EA8"/>
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    x:Name="NewProFormaButton"
+                    Content="New Pro Forma"
+                    Padding="18,9"
+                    Background="#7659B0"
+                    Foreground="White"
+                    VerticalAlignment="Center"/>
+        </Grid>
+
+
+        <!-- SEARCH -->
+        <Grid Grid.Row="1"
+              Margin="0,0,0,22">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="ProFormaSearchBar"
+                     PlaceholderText="Search pro forma number or customer..."
+                     Style="{StaticResource NovaTextBoxStyle}"
+                     TextChanged="ProFormaSearchBar_TextChanged"
+                     FocusDisengaged="ProFormaSearchBar_FocusDisengaged"
+                     FocusEngaged="ProFormaSearchBar_FocusEngaged"/>
+
+            <ListView
+                x:Name="ProFormaSearchResults"
+                MaxHeight="180"/>
+
+        </Grid>
+
+
+        <!-- MAIN CONTENT -->
+        <Grid Grid.Row="2">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="18"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+
+            <!-- INFORMATION -->
+            <Grid Grid.Row="0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.1*"/>
+                    <ColumnDefinition Width="18"/>
+                    <ColumnDefinition Width="1.1*"/>
+                    <ColumnDefinition Width="18"/>
+                    <ColumnDefinition Width="0.8*"/>
+                </Grid.ColumnDefinitions>
+
+
+                <!-- PRO FORMA INFORMATION -->
+                <Border Grid.Column="0"
+                        Background="#1F1F24"
+                        CornerRadius="8"
+                        Padding="20">
+
+                    <StackPanel Spacing="12">
+
+                        <TextBlock Text="Pro Forma Information"
+                                   FontSize="19"
+                                   FontWeight="SemiBold"
+                                   Foreground="#C8B3FF"/>
+
+                        <TextBlock Foreground="#B5B5BE">
+                            <Run Text="Pro Forma Number"/>
+                            <Run Text=" *"
+                                 Foreground="Red"/>
+                        </TextBlock>
+
+                        <TextBox x:Name="ProFormaNumberText"
+                                 PlaceholderText="PF-0001"
+                                 Style="{StaticResource NovaTextBoxStyle}"/>
+
+
+                        <TextBlock Foreground="#B5B5BE">
+                            <Run Text="Date"/>
+                            <Run Text=" *"
+                                 Foreground="Red"/>
+                        </TextBlock>
+
+                        <CalendarDatePicker x:Name="ProFormaDatePicker"
+                                            PlaceholderText="Select date"/>
+
+
+                        <TextBlock Foreground="#B5B5BE">
+                            <Run Text="Terms"/>
+                            <Run Text=" *"
+                                 Foreground="Red"/>
+                        </TextBlock>
+
+                        <TextBox x:Name="ProFormaTermsText"
+                                 Style="{StaticResource NovaTextBoxStyle}"/>
+
+
+                        <TextBlock Text="Notes"
+                                   Foreground="#B5B5BE"/>
+
+                        <TextBox x:Name="ProFormaNotesText"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 MinHeight="80"
+                                 Style="{StaticResource NovaTextBoxStyle}"/>
+
+                    </StackPanel>
+                </Border>
+
+
+                <!-- CUSTOMER -->
+                <Border Grid.Column="2"
+                        Background="#1F1F24"
+                        CornerRadius="8"
+                        Padding="20">
+
+                    <StackPanel Spacing="12">
+
+                        <TextBlock Text="Customer"
+                                   FontSize="19"
+                                   FontWeight="SemiBold"
+                                   Foreground="#C8B3FF"/>
+
+                        <TextBlock Text="Customer Search"
+                                   Foreground="#B5B5BE"/>
+
+                        <TextBox x:Name="CustomerSearchBar"
+                                 PlaceholderText="Search customers..."
+                                 Style="{StaticResource NovaTextBoxStyle}"/>
+
+                        <ListView x:Name="CustomerSearchResults"
+                                  MaxHeight="130"/>
+
+
+                        <TextBlock Margin="0,8,0,0"
+                                   Foreground="#B5B5BE">
+                            <Run Text="Selected Customer"/>
+                            <Run Text=" *"
+                                 Foreground="Red"/>
+                        </TextBlock>
+
+                        <TextBlock x:Name="SelectedCustomerText"
+                                   Text="No Customer Selected"
+                                   FontSize="16"
+                                   Foreground="White"/>
+
+
+                        <TextBlock Margin="0,8,0,0"
+                                   Foreground="#B5B5BE">
+                            <Run Text="Ship To"/>
+                            <Run Text=" *"
+                                 Foreground="Red"/>
+                        </TextBlock>
+
+                        <TextBox x:Name="ShipToText"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 MinHeight="70"
+                                 Style="{StaticResource NovaTextBoxStyle}"/>
+
+                    </StackPanel>
+                </Border>
+
+
+                <!-- TOTALS / ACTIONS -->
+                <Border Grid.Column="4"
+                        Background="#211D29"
+                        CornerRadius="8"
+                        Padding="20">
+
+                    <StackPanel Spacing="14">
+
+                        <TextBlock Text="Summary"
+                                   FontSize="19"
+                                   FontWeight="SemiBold"
+                                   Foreground="#D2C1FF"/>
+
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Subtotal"
+                                       Foreground="#B5B5BE"/>
+
+                            <TextBlock x:Name="SubtotalText"
+                                       Grid.Column="1"
+                                       Text="$0.00"
+                                       Foreground="White"/>
+                        </Grid>
+
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Shipping"
+                                       Foreground="#B5B5BE"/>
+
+                            <TextBlock x:Name="ShippingTotalText"
+                                       Grid.Column="1"
+                                       Text="$0.00"
+                                       Foreground="White"/>
+                        </Grid>
+
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Tax"
+                                       Foreground="#B5B5BE"/>
+
+                            <TextBlock x:Name="TaxText"
+                                       Grid.Column="1"
+                                       Text="$0.00"
+                                       Foreground="White"/>
+                        </Grid>
+
+
+                        <Rectangle Height="1"
+                                   Fill="#443A53"
+                                   Margin="0,4"/>
+
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Total"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"/>
+
+                            <TextBlock x:Name="ProFormaTotalText"
+                                       Grid.Column="1"
+                                       Text="$0.00"
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       Foreground="#C8B3FF"/>
+                        </Grid>
+
+
+                        <Button x:Name="SaveProFormaButton"
+                                Content="Save Pro Forma"
+                                Margin="0,12,0,0"
+                                Padding="14,10"
+                                HorizontalAlignment="Stretch"
+                                Background="#7659B0"
+                                Foreground="White"
+                                Click="SaveProFormaButton_Click"/>
+
+
+                        <Button x:Name="CreateInvoiceButton"
+                                Content="Create Invoice"
+                                Padding="14,10"
+                                HorizontalAlignment="Stretch"/>
+
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+
+
+            <!-- LINE ITEMS -->
+            <Border Grid.Row="2"
+                    Background="#1F1F24"
+                    CornerRadius="8"
+                    Padding="20">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+
+                    <!-- SECTION HEADER -->
+                    <Grid Grid.Row="0"
+                          Margin="0,0,0,14">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            FontSize="19"
+                            FontWeight="SemiBold"
+                            Foreground="#C8B3FF">
+
+                            <Run Text="Pro Forma Items"/>
+                            <Run Text=" *"
+                                 Foreground="Red"/>
+
+                        </TextBlock>
+
+                        <Button Grid.Column="1"
+                                x:Name="AddPartButton"
+                                Content="Add Part"
+                                Padding="14,7"
+                                Click="AddPartButton_Click"/>
+
+                    </Grid>
+
+
+                    <!-- PRO FORMA ITEMS TABLE -->
+                    <Border
+                        Grid.Row="1"
+                        Grid.RowSpan="2"
+                        BorderBrush="#423E4C"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Background="#1F1F24">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+
+                            <!-- COLUMN HEADERS -->
+                            <Grid
+                                Grid.Row="0"
+                                Padding="10,8"
+                                Background="#292930">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.2*"/>
+                                    <ColumnDefinition Width="18"/>
+
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="18"/>
+
+                                    <ColumnDefinition Width="0.7*"/>
+                                    <ColumnDefinition Width="18"/>
+
+                                    <ColumnDefinition Width="0.9*"/>
+                                    <ColumnDefinition Width="18"/>
+
+                                    <ColumnDefinition Width="0.9*"/>
+                                    <ColumnDefinition Width="18"/>
+
+                                    <ColumnDefinition Width="90"/>
+                                </Grid.ColumnDefinitions>
+
+
+                                <!-- PART NUMBER -->
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Text="Part Number"
+                                    FontWeight="SemiBold"
+                                    Foreground="#B5B5BE"
+                                    VerticalAlignment="Center"/>
+
+
+                                <!-- DIVIDER -->
+                                <Rectangle
+                                    Grid.Column="1"
+                                    Width="1"
+                                    Fill="#423E4C"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Stretch"/>
+
+
+                                <!-- DESCRIPTION -->
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="Description"
+                                    FontWeight="SemiBold"
+                                    Foreground="#B5B5BE"
+                                    VerticalAlignment="Center"/>
+
+
+                                <!-- DIVIDER -->
+                                <Rectangle
+                                    Grid.Column="3"
+                                    Width="1"
+                                    Fill="#423E4C"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Stretch"/>
+
+
+                                <!-- QUANTITY -->
+                                <TextBlock
+                                    Grid.Column="4"
+                                    Text="Qty"
+                                    FontWeight="SemiBold"
+                                    Foreground="#B5B5BE"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+
+                                <!-- DIVIDER -->
+                                <Rectangle
+                                    Grid.Column="5"
+                                    Width="1"
+                                    Fill="#423E4C"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Stretch"/>
+
+
+                                <!-- UNIT PRICE -->
+                                <TextBlock
+                                    Grid.Column="6"
+                                    Text="Unit Price"
+                                    FontWeight="SemiBold"
+                                    Foreground="#B5B5BE"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+
+                                <!-- DIVIDER -->
+                                <Rectangle
+                                    Grid.Column="7"
+                                    Width="1"
+                                    Fill="#423E4C"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Stretch"/>
+
+
+                                <!-- TOTAL -->
+                                <TextBlock
+                                    Grid.Column="8"
+                                    Text="Total"
+                                    FontWeight="SemiBold"
+                                    Foreground="#B5B5BE"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+
+                                <!-- DIVIDER -->
+                                <Rectangle
+                                    Grid.Column="9"
+                                    Width="1"
+                                    Fill="#423E4C"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Stretch"/>
+
+
+                                <!-- ACTIONS -->
+                                <TextBlock
+                                    Grid.Column="10"
+                                    Text="Actions"
+                                    FontWeight="SemiBold"
+                                    Foreground="#B5B5BE"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+                            </Grid>
+
+
+                            <!-- HEADER / LIST SEPARATOR -->
+                            <Rectangle
+                                Grid.Row="0"
+                                Height="1"
+                                Fill="#423E4C"
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Stretch"/>
+
+
+                            <!-- ITEM LIST -->
+                            <ListView
+                                Grid.Row="1"
+                                x:Name="ProFormaItemsList"
+                                Margin="0"
+                                Padding="0"/>
+
+                        </Grid>
+
+                    </Border>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</Page>

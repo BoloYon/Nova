@@ -17,6 +17,7 @@
     <None Remove="CustomerPage.xaml" />
     <None Remove="HomePage.xaml" />
     <None Remove="Views\PartsPage.xaml" />
+    <None Remove="Views\ProFormaPage.xaml" />
     <None Remove="Views\VendorsPage.xaml" />
   </ItemGroup>
 
@@ -48,6 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nova.Data\Nova.Data.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\ProFormaPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\VendorsPage.xaml">
